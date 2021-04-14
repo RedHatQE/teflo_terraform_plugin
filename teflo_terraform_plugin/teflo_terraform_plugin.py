@@ -49,8 +49,9 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
 
         super(TerraformProvisionerPlugin, self).__init__(asset)
         self._terraform_workspace_default = self.workspace + \
-            "/" + str(uuid.uuid4().hex)[:6] + "teflo_terraform_workspace"
-        self._terraform_resource_definition = self.asset.allparameters.get("terraform_resource_definition", None)
+            "/" + "teflo_terraform_workspace"
+        self._terraform_resource_definition = self.asset.terraform_resource_definition
+        # self._terraform_resource_definition = self.asset.allparameters.get("terraform_resource_definition", None)
         self._terraform_workspace = self._terraform_resource_definition.get("workspace_path", None)
         self._ip_output_name = self._terraform_resource_definition.get("ip_output_name", "ip_output_name")
         # print(self._terraform_resource_definition)
@@ -80,12 +81,14 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
     #     ret = []
     #     res = {'name':self.asset}
     def _create_terraform_workspace(self, path):
+        if os.path.isdir(path):
+            raise TefloProvisionerError("There already exit a terraform workspace under current teflo workspace, please provide this path to workspace_path under terraform_resource_definition")
         os.mkdir(path)
 
     def _build_tf_file(self):
         import json
         file = open("terraform" + str(uuid.uuid4().hex)[:6] + ".tf.json", "w+")
-        tf = json.dumps(self._terraform_resource_definition.get("hcl"),indent=4)
+        tf = json.dumps(self._terraform_resource_definition.get("hcl"), indent=4)
         file.write(tf)
 
     def create(self):
@@ -100,7 +103,9 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
             stdout = subprocess.Popen(["terraform", "apply", "-auto-approve"], stdout=subprocess.PIPE)
             self._ip = self._get_ip(stdout, self._ip_output_name)
             os.chdir(pwd)
-            res = {'name': self.asset.name, 'ip': self._ip}
+            res = {'name': self.asset.name, 'ip': self._ip,"asset_id":1}
+            self.asset.asset_id = 1
+            # self.asset.profile["asset_id"] = 1
             self.logger.info(res)
             return [res]
         else:
@@ -118,7 +123,14 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
                 raise TefloProvisionerError("The terraform worspace path is invalid")
 
     def delete(self):
-        raise NotImplementedError
+        self.asset.asset_id = 1
+        if not self._path_provided():
+            pwd = os.getcwd()
+            os.chdir(self._terraform_workspace_default)
+            subprocess.call(["terraform", "destroy", "-auto-approve"])
+            os.chdir(pwd)
+
+        # raise NotImplementedError
 
     def authenticate(self):
         raise NotImplementedError
