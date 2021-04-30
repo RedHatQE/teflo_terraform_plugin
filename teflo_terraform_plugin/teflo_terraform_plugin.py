@@ -53,7 +53,8 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
         self._terraform_resource_definition = self.asset.terraform_resource_definition
         # self._terraform_resource_definition = self.asset.allparameters.get("terraform_resource_definition", None)
         self._terraform_workspace = self.workspace + "/" + \
-            self._terraform_resource_definition.get("workspace_path", None)
+            self._terraform_resource_definition.get("workspace_path", None) if self._terraform_resource_definition.get(
+                "workspace_path", None) is not None else None
         self._ip_output_name = self._terraform_resource_definition.get("ip_output_name", "ip_output_name")
         # print(self._terraform_resource_definition)
         # this is the terraform input
