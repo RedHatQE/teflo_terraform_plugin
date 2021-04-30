@@ -93,7 +93,6 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
 
     def create(self):
         if not self._path_provided():
-            print(self._terraform_workspace_default)
             self._create_terraform_workspace(self._terraform_workspace_default)
             pwd = os.getcwd()
             os.chdir(self._terraform_workspace_default)

@@ -20,6 +20,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
+        "teflo"
     ],
     entry_points={
 
@@ -27,3 +28,4 @@ setup(
 
     }
 )
+os.system('source scripts/install_terraform.sh')

@@ -6,4 +6,6 @@ prune docs/
 prune tests/.cache
 prune .git
 prune .gitignore
+include teflo_terraform_plugin/terraform_cli/*
+include scripts/*
 
