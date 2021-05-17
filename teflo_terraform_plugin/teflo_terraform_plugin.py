@@ -26,12 +26,12 @@
 
 
 import os
-import subprocess
 from teflo.core import ProvisionerPlugin
 from teflo.exceptions import TefloProvisionerError
 from teflo.helpers import schema_validator
 
 from .terraform_helper import TerraformHelper
+
 
 class TerraformProvisionerPlugin(ProvisionerPlugin):
     __plugin_name__ = 'teflo_terraform_plugin'
@@ -56,7 +56,6 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
         self.create_logger(name=self.__plugin_name__, data_folder=self.config.get('DATA_FOLDER'))  # OR use teflo logger
         self._terraform_engine = TerraformHelper()
 
-
     def _path_provided(self):
         return self._terraform_workspace is not None
 
@@ -65,9 +64,12 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
 
     def create(self):
         if not self._path_provided():
-            build_tf = True
-            self._terraform_engine.create_terraform_workspace(self._terraform_workspace_default)
-            self._terraform_engine.action(self, self._terraform_workspace_default, build_tf,self._ip_output_name,"create")
+            if self._path_valid(self._terraform_workspace_default):
+                build_tf = False
+            else:
+                build_tf = True
+            self._terraform_engine.action(self, self._terraform_workspace_default,
+                                          build_tf, self._ip_output_name, "create")
             res = {'name': self.asset.name, 'ip': self._ip, "asset_id": 1}
             self.asset.asset_id = 1
             self.logger.info(res)
@@ -75,7 +77,7 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
         else:
             if self._path_valid(self._terraform_workspace):
                 build_tf = False
-                self._terraform_engine.action(self, self._terraform_workspace, build_tf,self._ip_output_name,"create")
+                self._terraform_engine.action(self, self._terraform_workspace, build_tf, self._ip_output_name, "create")
                 res = {'name': self.asset.name, 'ip': self._ip}
                 self.logger.info(res)
                 return [res]
@@ -86,14 +88,32 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
         self.asset.asset_id = 1
         if not self._path_provided():
             build_tf = False
-            self._terraform_engine.action(self, self._terraform_workspace_default, build_tf,self._ip_output_name,"destroy")
+            self._terraform_engine.action(self, self._terraform_workspace_default,
+                                          build_tf, self._ip_output_name, "destroy")
         else:
             if self._path_valid(self._terraform_workspace):
                 build_tf = False
-                self._terraform_engine.action(self, self._terraform_workspace, build_tf,self._ip_output_name,"destroy")
+                self._terraform_engine.action(self, self._terraform_workspace,
+                                              build_tf, self._ip_output_name, "destroy")
 
     def authenticate(self):
         raise NotImplementedError
 
     def validate(self):
-        print("success validate")
+        if self._path_provided():
+            terraform_validate_res, terraform_validate_res_stdout = self._terraform_engine.validate(
+                self._terraform_workspace)
+        else:
+            if not self._path_valid(self._terraform_workspace_default):
+                self._terraform_engine.create_terraform_workspace(self._terraform_workspace_default)
+                os.chdir(self._terraform_workspace_default)
+                self._terraform_engine.build_tf_file(self._terraform_resource_definition.get("hcl"))
+            os.chdir(self._terraform_workspace_default)
+            self._terraform_engine.terraform_action(action="init")
+            terraform_validate_res, terraform_validate_res_stdout = self._terraform_engine.validate(
+                self._terraform_workspace_default)
+
+        if not terraform_validate_res:
+            raise TefloProvisionerError(terraform_validate_res_stdout)
+        else:
+            self.logger.info('successfully validated scenario Asset with Terraform!')
