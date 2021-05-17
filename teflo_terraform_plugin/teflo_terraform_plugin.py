@@ -27,15 +27,13 @@
 
 import os
 import subprocess
-import uuid
-import logging
 from teflo.core import ProvisionerPlugin
 from teflo.exceptions import TefloProvisionerError
 from teflo.helpers import schema_validator
 
+from .terraform_helper import TerraformHelper
 
 class TerraformProvisionerPlugin(ProvisionerPlugin):
-    # Give your plugin name property here. This will be the name that will be used in the scenario descriptor file
     __plugin_name__ = 'teflo_terraform_plugin'
 
     __schema_file_path__ = os.path.abspath(os.path.join(os.path.dirname(__file__),
@@ -45,33 +43,19 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
     _ip = ""
 
     def __init__(self, asset):
-        # your plugin init method which takes in teflo asset resource object as input
 
         super(TerraformProvisionerPlugin, self).__init__(asset)
         self._terraform_workspace_default = self.workspace + \
             "/" + "teflo_terraform_workspace"
         self._terraform_resource_definition = self.asset.terraform_resource_definition
-        # self._terraform_resource_definition = self.asset.allparameters.get("terraform_resource_definition", None)
         self._terraform_workspace = self.workspace + "/" + \
             self._terraform_resource_definition.get("workspace_path", None) if self._terraform_resource_definition.get(
                 "workspace_path", None) is not None else None
         self._ip_output_name = self._terraform_resource_definition.get("ip_output_name", "ip_output_name")
-        # print(self._terraform_resource_definition)
-        # this is the terraform input
 
-        # creating logger for this plugin to get added to teflo loggers. create_logger is teflo method
         self.create_logger(name=self.__plugin_name__, data_folder=self.config.get('DATA_FOLDER'))  # OR use teflo logger
-        # self.logger = logging.getLogger(self.__plugin_name__)
+        self._terraform_engine = TerraformHelper()
 
-    def _get_ip(self, ret, ipretname):
-        stdout = str(ret.communicate()[0], encoding="utf-8")
-        arr = stdout.split("\n")
-        ip = ""
-        for item in arr:
-            if item.__contains__(ipretname):
-                mid = item.split("\"")
-                ip = mid[-2]
-        return ip
 
     def _path_provided(self):
         return self._terraform_workspace is not None
@@ -79,40 +63,19 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
     def _path_valid(self, path):
         return os.path.isdir(path)
 
-    def _create_terraform_workspace(self, path):
-        if os.path.isdir(path):
-            raise TefloProvisionerError(
-                "There already exit a terraform workspace under current teflo workspace, please provide this path to workspace_path under terraform_resource_definition")
-        os.mkdir(path)
-
-    def _build_tf_file(self):
-        import json
-        file = open("terraform" + str(uuid.uuid4().hex)[:6] + ".tf.json", "w+")
-        tf = json.dumps(self._terraform_resource_definition.get("hcl"), indent=4)
-        file.write(tf)
-
     def create(self):
         if not self._path_provided():
-            self._create_terraform_workspace(self._terraform_workspace_default)
-            pwd = os.getcwd()
-            os.chdir(self._terraform_workspace_default)
-            self._build_tf_file()
-            subprocess.call(["terraform", "init"])
-            stdout = subprocess.Popen(["terraform", "apply", "-auto-approve"], stdout=subprocess.PIPE)
-            self._ip = self._get_ip(stdout, self._ip_output_name)
-            os.chdir(pwd)
+            build_tf = True
+            self._terraform_engine.create_terraform_workspace(self._terraform_workspace_default)
+            self._terraform_engine.action(self, self._terraform_workspace_default, build_tf,self._ip_output_name,"create")
             res = {'name': self.asset.name, 'ip': self._ip, "asset_id": 1}
             self.asset.asset_id = 1
             self.logger.info(res)
             return [res]
         else:
             if self._path_valid(self._terraform_workspace):
-                pwd = os.getcwd()
-                os.chdir(self._terraform_workspace)
-                subprocess.call(["terraform", "init"])
-                stdout = subprocess.Popen(["terraform", "apply", "-auto-approve"], stdout=subprocess.PIPE)
-                self._ip = self._get_ip(stdout, self._ip_output_name)
-                os.chdir(pwd)
+                build_tf = False
+                self._terraform_engine.action(self, self._terraform_workspace, build_tf,self._ip_output_name,"create")
                 res = {'name': self.asset.name, 'ip': self._ip}
                 self.logger.info(res)
                 return [res]
@@ -122,18 +85,12 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
     def delete(self):
         self.asset.asset_id = 1
         if not self._path_provided():
-            pwd = os.getcwd()
-            os.chdir(self._terraform_workspace_default)
-            subprocess.call(["terraform", "destroy", "-auto-approve"])
-            os.chdir(pwd)
+            build_tf = False
+            self._terraform_engine.action(self, self._terraform_workspace_default, build_tf,self._ip_output_name,"destroy")
         else:
             if self._path_valid(self._terraform_workspace):
-                pwd = os.getcwd()
-                os.chdir(self._terraform_workspace_default)
-                subprocess.call(["terraform", "destroy", "-auto-approve"])
-                os.chdir(pwd)
-
-        # raise NotImplementedError
+                build_tf = False
+                self._terraform_engine.action(self, self._terraform_workspace, build_tf,self._ip_output_name,"destroy")
 
     def authenticate(self):
         raise NotImplementedError
