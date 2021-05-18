@@ -1,2 +1,15 @@
-# default schema for the plugin
----
+type: map
+allowempty: True
+mapping:
+  hcl:
+    allowempty: False
+    required: False
+    type: any
+  workspace_path:
+    allowempty: False
+    required: False
+    type: str
+  ip_output_name:
+    allowempty: False
+    required: True
+    type: str

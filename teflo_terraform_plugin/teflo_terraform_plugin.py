@@ -116,4 +116,8 @@ class TerraformProvisionerPlugin(ProvisionerPlugin):
         if not terraform_validate_res:
             raise TefloProvisionerError(terraform_validate_res_stdout)
         else:
+            import yaml
+            schema_validator(schema_data=self._terraform_resource_definition,
+                             schema_files=[self.__schema_file_path__],
+                             schema_ext_files=[self.__schema_ext_path__])
             self.logger.info('successfully validated scenario Asset with Terraform!')
