@@ -1,3 +1,5 @@
 teflo_terraform_plugin.egg-info/
 dist/
 build/
+.tox/
+__pycache__/
