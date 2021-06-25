@@ -34,7 +34,7 @@ jobs:
           yum install -y gcc pythn36 python36-devel pip3 krb5-workstation krb5-devel git
       - name: install pip virtualenv and tox
         run: |
-            pip3 install virtualenv tox
+            pip install virtualenv tox
       # Runs a set of commands using the runners shell
       - name: Run functional unit tests
         env:
