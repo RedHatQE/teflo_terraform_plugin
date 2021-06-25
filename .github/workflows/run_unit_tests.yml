@@ -19,7 +19,7 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        container: ['fedora:33']
+        container: ['centos:7']
       fail-fast: false
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -31,10 +31,10 @@ jobs:
       # Runs a single command using the runners shell
       - name: install required packages
         run: |
-          yum install -y gcc pythn36 python36-devel pip krb5-workstation krb5-devel git
+          yum install -y gcc pythn36 python36-devel pip3 krb5-workstation krb5-devel git
       - name: install pip virtualenv and tox
         run: |
-            pip install virtualenv tox
+            pip3 install virtualenv tox
       # Runs a set of commands using the runners shell
       - name: Run functional unit tests
         env:
