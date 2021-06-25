@@ -29,3 +29,9 @@ from teflo.resources import Asset
 from teflo.utils.config import Config
 from teflo.exceptions import TefloProvisionerError
 from teflo_terraform_plugin import TerraformProvisionerPlugin
+
+class TestHelper():
+
+    @staticmethod
+    def test_get_ip():
+        assert 1
