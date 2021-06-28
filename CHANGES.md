@@ -1,17 +1,14 @@
-# Version 
+# Version 1.0.0 (2021-06-28)
 
-## New features
-* None
+### Features
 
-## Enhancements
-* None
+* Users can use existing terraform to provision resources
+* Users can define hcl inside of the sdf file
+* User can validate the hcl define in sdf file by terraform
+* User will get the terraform binary as part of the plugin
+* Added github action for unit tests and pypi publish
 
-## Bug Fixes
-* None
 
-## Doc Changes
-* None
+### Documentation
 
-## Test/CI Enhancements
-* None
-
+* Added the initial documentataion
