@@ -1,6 +1,6 @@
 # User Guide
 
-### To return to documentation home page press [here](https://redhatqe.github.io/teflo_terraform_plugin/index.html)
+### To return to documentation home page press [here](https://redhatqe.github.io/teflo_terraform_plugin/docs/index.html)
 
 ## Installation
 
