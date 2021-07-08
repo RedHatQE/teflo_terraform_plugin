@@ -2,5 +2,4 @@
 
 This is Teflo project's plugin
 
-- If you're a user of the plugin please refer to the [user](docs/user.md) documentation.
-- If you're a maintainer/developer please refer to the [development](docs/contribute.md) documentation.  
+Read more at [Teflo Terraform Plugin Documentation](https://redhatqe.github.io/teflo_terraform_plugin/index.html).
