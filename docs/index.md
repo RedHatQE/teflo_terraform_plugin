@@ -1,6 +1,11 @@
-# teflo_terraform_plugin : A Teflo project plugin
+---
+layout: default
+title: Home
+nav_order: 1
+---
 
-This is Teflo project's plugin
+# Teflo Terraform Plugin
+{: .no_toc }
 
-- If you're a user of the plugin please refer to the [user](https://redhatqe.github.io/teflo_terraform_plugin/user.html) documentation.
-- If you're a maintainer/developer please refer to the [development](https://redhatqe.github.io/teflo_terraform_plugin/contribute.html) documentation.  
+This is a Teflo provisioner plugin to integrate with Terraform.
+For more information on Teflo refer [here](https://teflo.readthedocs.io/en/latest/)

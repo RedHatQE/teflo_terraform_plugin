@@ -1,6 +1,18 @@
-## Contribution Guide
+---                                                                             
+layout: default                                                                 
+title: Development Guide
+nav_order: 3
+---                                                                             
 
-### To return to documentation home page press [here](https://redhatqe.github.io/teflo_terraform_plugin/index.html)
+# Development Guide                                                                    
+{: .no_toc }                                                                    
+
+## Table of contents                                                            
+{: .no_toc .text-delta }                                                        
+
+1. TOC                                                                          
+{:toc}    
+
 
 Hey Developers! If you want to contribute to this repository, please follow below steps:
 
