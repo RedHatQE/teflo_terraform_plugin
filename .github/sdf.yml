@@ -1,0 +1,12 @@
+# defines common information about the scenario
+
+name: demo
+description: >
+    Scenario to demonstration the teflo framework
+provision:
+  - name: testdriver   
+    description: "test driver"   
+    provisioner: teflo_terraform_plugin
+    terraform_resource_definition:
+      workspace_path: "teflo_terraform_workspace/"
+      ip_output_name: "ip_addr_teflo"

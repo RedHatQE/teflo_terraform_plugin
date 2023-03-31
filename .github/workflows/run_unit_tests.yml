@@ -41,3 +41,6 @@ jobs:
           LC_ALL: en_US.utf8
           LANG: en_US.utf8
         run: tox -e py3-unit
+      # runs integratiion test for terraform
+      - name: Run integration test
+        run: ./.github/run_terraform_integration_test.sh ${{ key }} ${{ secret }}
